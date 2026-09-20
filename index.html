@@ -1,0 +1,1024 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Server Control Panel</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+    background:#08090d;
+    color:#f2f3f5;
+    font-family:Inter,Arial,sans-serif;
+    min-height:100vh;
+}
+
+button,input{
+    font:inherit;
+}
+
+.app{
+    display:flex;
+    min-height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:240px;
+    background:#0d0f14;
+    border-right:1px solid #1c1f27;
+    padding:22px 15px;
+    position:fixed;
+    inset:0 auto 0 0;
+}
+
+.logo{
+    font-size:21px;
+    font-weight:800;
+    padding:8px 12px 25px;
+}
+
+.logo span{
+    color:#6d7cff;
+}
+
+.nav{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.nav button{
+    background:none;
+    border:0;
+    color:#8e929c;
+    text-align:left;
+    padding:12px 13px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.nav button:hover,
+.nav button.active{
+    background:#171a23;
+    color:white;
+}
+
+/* CONTENT */
+
+.content{
+    margin-left:240px;
+    width:calc(100% - 240px);
+    padding:30px;
+}
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:28px;
+}
+
+.server-title{
+    font-size:28px;
+    font-weight:800;
+}
+
+.status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#8f96a3;
+    font-size:14px;
+}
+
+.dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:#777;
+}
+
+.dot.online{
+    background:#39d98a;
+    box-shadow:0 0 10px #39d98a;
+}
+
+.dot.offline{
+    background:#ff4d5f;
+}
+
+/* CARDS */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:22px;
+}
+
+.card{
+    background:#0e1016;
+    border:1px solid #1b1e26;
+    border-radius:12px;
+    padding:20px;
+}
+
+.card-label{
+    color:#858b97;
+    font-size:13px;
+    margin-bottom:10px;
+}
+
+.card-value{
+    font-size:25px;
+    font-weight:750;
+}
+
+/* CONTROLS */
+
+.controls{
+    display:flex;
+    gap:10px;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    border:1px solid #252a35;
+    background:#13161d;
+    color:#fff;
+    border-radius:8px;
+    padding:11px 18px;
+    cursor:pointer;
+    transition:.15s;
+}
+
+.btn:hover{
+    background:#1b1f29;
+}
+
+.btn.start{
+    background:#168a57;
+    border-color:#168a57;
+}
+
+.btn.start:hover{
+    background:#1da968;
+}
+
+.btn.stop{
+    background:#a52d3b;
+    border-color:#a52d3b;
+}
+
+.btn.stop:hover{
+    background:#c23948;
+}
+
+.btn.restart{
+    background:#4f5ed5;
+    border-color:#4f5ed5;
+}
+
+/* PANELS */
+
+.panel{
+    background:#0e1016;
+    border:1px solid #1b1e26;
+    border-radius:12px;
+    margin-bottom:20px;
+    overflow:hidden;
+}
+
+.panel-header{
+    padding:16px 19px;
+    border-bottom:1px solid #1b1e26;
+    font-weight:700;
+}
+
+.console{
+    height:420px;
+    overflow:auto;
+    padding:18px;
+    background:#080a0e;
+    font-family:Consolas,monospace;
+    font-size:13px;
+    line-height:1.7;
+    white-space:pre-wrap;
+}
+
+.log-info{color:#aab1bd}
+.log-success{color:#43d996}
+.log-error{color:#ff6978}
+.log-command{color:#7f91ff}
+
+/* SETTINGS */
+
+.settings{
+    display:none;
+}
+
+.form{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+    margin-bottom:18px;
+}
+
+.form label{
+    color:#9ba1ac;
+    font-size:13px;
+}
+
+.form input{
+    background:#090b10;
+    border:1px solid #252a34;
+    color:white;
+    padding:11px;
+    border-radius:7px;
+    outline:none;
+}
+
+.form input:focus{
+    border-color:#5969ed;
+}
+
+/* MOBILE */
+
+@media(max-width:850px){
+    .sidebar{
+        width:65px;
+        padding:15px 8px;
+    }
+
+    .logo{
+        font-size:0;
+        text-align:center;
+    }
+
+    .logo span{
+        font-size:20px;
+    }
+
+    .nav button{
+        font-size:0;
+        text-align:center;
+    }
+
+    .nav button::first-letter{
+        font-size:20px;
+    }
+
+    .content{
+        margin-left:65px;
+        width:calc(100% - 65px);
+        padding:18px;
+    }
+
+    .grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:500px){
+    .grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<aside class="sidebar">
+
+    <div class="logo">
+        <span>◆</span> Control
+    </div>
+
+    <div class="nav">
+        <button class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</button>
+        <button onclick="showPage('console',this)">🖥 Console</button>
+        <button onclick="showPage('settings',this)">⚙ Settings</button>
+    </div>
+
+</aside>
+
+<main class="content">
+
+    <!-- DASHBOARD -->
+
+    <section id="dashboard">
+
+        <div class="topbar">
+
+            <div>
+                <div class="server-title" id="serverName">
+                    My Minecraft Server
+                </div>
+
+                <div class="status">
+                    <span class="dot offline" id="statusDot"></span>
+                    <span id="statusText">Offline</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="grid">
+
+            <div class="card">
+                <div class="card-label">Server Status</div>
+                <div class="card-value" id="statusCard">Offline</div>
+            </div>
+
+            <div class="card">
+                <div class="card-label">Players</div>
+                <div class="card-value" id="players">0 / 0</div>
+            </div>
+
+            <div class="card">
+                <div class="card-label">Uptime</div>
+                <div class="card-value" id="uptime">00:00:00</div>
+            </div>
+
+            <div class="card">
+                <div class="card-label">Version</div>
+                <div class="card-value" id="version">--</div>
+            </div>
+
+        </div>
+
+        <div class="controls">
+
+            <button class="btn start" onclick="serverAction('start')">
+                ▶ Start
+            </button>
+
+            <button class="btn stop" onclick="serverAction('stop')">
+                ■ Stop
+            </button>
+
+            <button class="btn restart" onclick="serverAction('restart')">
+                ↻ Restart
+            </button>
+
+        </div>
+
+        <div class="panel">
+
+            <div class="panel-header">
+                Recent Logs
+            </div>
+
+            <div class="console" id="dashboardLogs"></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CONSOLE -->
+
+    <section id="console" style="display:none">
+
+        <div class="topbar">
+            <div class="server-title">Console</div>
+        </div>
+
+        <div class="panel">
+
+            <div class="console" id="fullConsole"></div>
+
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:10px">
+
+            <input
+                id="commandInput"
+                placeholder="Enter Minecraft command..."
+                style="
+                flex:1;
+                background:#0e1016;
+                border:1px solid #252a35;
+                color:white;
+                padding:12px;
+                border-radius:8px;
+                outline:none;
+                "
+                onkeydown="if(event.key==='Enter')sendCommand()"
+            >
+
+            <button class="btn" onclick="sendCommand()">
+                Send
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- SETTINGS -->
+
+    <section id="settings" class="settings">
+
+        <div class="topbar">
+            <div class="server-title">Server Settings</div>
+        </div>
+
+        <div class="panel">
+
+            <div class="panel-header">
+                General
+            </div>
+
+            <div style="padding:20px">
+
+                <div class="form">
+
+                    <label>Server Name</label>
+
+                    <input
+                        id="nameInput"
+                        value="My Minecraft Server"
+                        placeholder="Server name"
+                    >
+
+                </div>
+
+                <div class="form">
+
+                    <label>VPS API URL</label>
+
+                    <input
+                        id="apiInput"
+                        placeholder="https://your-vps-api.example.com"
+                    >
+
+                </div>
+
+                <button class="btn start" onclick="saveSettings()">
+                    Save Settings
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+</div>
+
+
+<script>
+
+/*
+===========================================================
+CONFIGURATION
+===========================================================
+
+Your Vercel frontend should communicate with a backend API.
+
+Example API endpoints:
+
+GET  /api/status
+POST /api/start
+POST /api/stop
+POST /api/restart
+GET  /api/logs
+POST /api/command
+
+The backend should run on your VPS or another secure server.
+
+DO NOT put SSH passwords/private keys in this file.
+===========================================================
+*/
+
+let API_URL = localStorage.getItem("server_api") || "";
+
+let serverStartTime = null;
+let uptimeTimer = null;
+
+
+/* ---------------- PAGE NAVIGATION ---------------- */
+
+function showPage(page, button){
+
+    document.getElementById("dashboard").style.display =
+        page === "dashboard" ? "block" : "none";
+
+    document.getElementById("console").style.display =
+        page === "console" ? "block" : "none";
+
+    document.getElementById("settings").style.display =
+        page === "settings" ? "block" : "none";
+
+    document.querySelectorAll(".nav button")
+        .forEach(x => x.classList.remove("active"));
+
+    button.classList.add("active");
+}
+
+
+/* ---------------- LOGGING ---------------- */
+
+function addLog(message,type="info"){
+
+    const time = new Date().toLocaleTimeString();
+
+    const line =
+        `[${time}] ${message}`;
+
+    const elements = [
+        document.getElementById("dashboardLogs"),
+        document.getElementById("fullConsole")
+    ];
+
+    elements.forEach(el => {
+
+        if(!el) return;
+
+        const div = document.createElement("div");
+
+        div.className = "log-" + type;
+
+        div.textContent = line;
+
+        el.appendChild(div);
+
+        el.scrollTop = el.scrollHeight;
+
+    });
+}
+
+
+/* ---------------- SERVER ACTIONS ---------------- */
+
+async function serverAction(action){
+
+    if(!API_URL){
+
+        addLog(
+            "No API URL configured. Open Settings first.",
+            "error"
+        );
+
+        return;
+    }
+
+    addLog(
+        `Sending ${action} request...`,
+        "command"
+    );
+
+    try{
+
+        const response = await fetch(
+            `${API_URL}/api/${action}`,
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                }
+            }
+        );
+
+        if(!response.ok){
+
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+
+        }
+
+        const data = await response.json();
+
+        addLog(
+            data.message || `${action} request accepted.`,
+            "success"
+        );
+
+        setTimeout(updateStatus,1000);
+
+    }
+    catch(error){
+
+        addLog(
+            `Failed: ${error.message}`,
+            "error"
+        );
+
+    }
+}
+
+
+/* ---------------- COMMAND ---------------- */
+
+async function sendCommand(){
+
+    const input =
+        document.getElementById("commandInput");
+
+    const command =
+        input.value.trim();
+
+    if(!command) return;
+
+    input.value = "";
+
+    addLog(
+        `> ${command}`,
+        "command"
+    );
+
+    if(!API_URL){
+
+        addLog(
+            "No API URL configured.",
+            "error"
+        );
+
+        return;
+    }
+
+    try{
+
+        const response = await fetch(
+            `${API_URL}/api/command`,
+            {
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+                    command:command
+                })
+            }
+        );
+
+        if(!response.ok)
+            throw new Error(`HTTP ${response.status}`);
+
+        const data =
+            await response.json();
+
+        if(data.message)
+            addLog(data.message,"success");
+
+    }
+    catch(error){
+
+        addLog(
+            `Command failed: ${error.message}`,
+            "error"
+        );
+
+    }
+}
+
+
+/* ---------------- STATUS ---------------- */
+
+async function updateStatus(){
+
+    if(!API_URL) return;
+
+    try{
+
+        const response =
+            await fetch(
+                `${API_URL}/api/status`,
+                {
+                    cache:"no-store"
+                }
+            );
+
+        if(!response.ok)
+            throw new Error("Status request failed");
+
+        const data =
+            await response.json();
+
+
+        const online =
+            data.online === true;
+
+
+        document.getElementById("statusText")
+            .textContent =
+            online ? "Online" : "Offline";
+
+        document.getElementById("statusCard")
+            .textContent =
+            online ? "Online" : "Offline";
+
+
+        const dot =
+            document.getElementById("statusDot");
+
+        dot.classList.remove(
+            "online",
+            "offline"
+        );
+
+        dot.classList.add(
+            online ? "online" : "offline"
+        );
+
+
+        if(
+            data.players !== undefined
+        ){
+
+            document.getElementById("players")
+                .textContent =
+                `${data.players} / ${data.maxPlayers ?? "?"}`;
+
+        }
+
+
+        if(data.version){
+
+            document.getElementById("version")
+                .textContent =
+                data.version;
+
+        }
+
+
+        if(online){
+
+            if(!serverStartTime)
+                serverStartTime =
+                    Date.now();
+
+            startUptime();
+
+        }
+        else{
+
+            serverStartTime = null;
+
+            document.getElementById("uptime")
+                .textContent =
+                "00:00:00";
+
+        }
+
+    }
+    catch(error){
+
+        console.warn(error);
+
+    }
+}
+
+
+/* ---------------- UPTIME ---------------- */
+
+function startUptime(){
+
+    if(uptimeTimer) return;
+
+    uptimeTimer =
+        setInterval(()=>{
+
+            if(!serverStartTime)
+                return;
+
+            const seconds =
+                Math.floor(
+                    (Date.now() -
+                    serverStartTime) / 1000
+                );
+
+            const h =
+                String(
+                    Math.floor(seconds / 3600)
+                ).padStart(2,"0");
+
+            const m =
+                String(
+                    Math.floor((seconds % 3600)/60)
+                ).padStart(2,"0");
+
+            const s =
+                String(
+                    seconds % 60
+                ).padStart(2,"0");
+
+            document.getElementById("uptime")
+                .textContent =
+                `${h}:${m}:${s}`;
+
+        },1000);
+
+}
+
+
+/* ---------------- LOG POLLING ---------------- */
+
+async function updateLogs(){
+
+    if(!API_URL) return;
+
+    try{
+
+        const response =
+            await fetch(
+                `${API_URL}/api/logs`,
+                {
+                    cache:"no-store"
+                }
+            );
+
+        if(!response.ok)
+            return;
+
+        const data =
+            await response.json();
+
+        if(!Array.isArray(data.logs))
+            return;
+
+
+        const dashboard =
+            document.getElementById(
+                "dashboardLogs"
+            );
+
+        const consoleElement =
+            document.getElementById(
+                "fullConsole"
+            );
+
+
+        dashboard.innerHTML = "";
+        consoleElement.innerHTML = "";
+
+
+        data.logs.forEach(log => {
+
+            const d1 =
+                document.createElement("div");
+
+            const d2 =
+                document.createElement("div");
+
+            d1.textContent = log;
+            d2.textContent = log;
+
+            dashboard.appendChild(d1);
+            consoleElement.appendChild(d2);
+
+        });
+
+        dashboard.scrollTop =
+            dashboard.scrollHeight;
+
+        consoleElement.scrollTop =
+            consoleElement.scrollHeight;
+
+    }
+    catch(error){
+
+        console.warn(
+            "Log update failed:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ---------------- SETTINGS ---------------- */
+
+function saveSettings(){
+
+    const name =
+        document.getElementById(
+            "nameInput"
+        ).value.trim();
+
+    const api =
+        document.getElementById(
+            "apiInput"
+        ).value.trim()
+        .replace(/\/$/,"");
+
+
+    if(name){
+
+        localStorage.setItem(
+            "server_name",
+            name
+        );
+
+        document.getElementById(
+            "serverName"
+        ).textContent =
+            name;
+
+    }
+
+
+    if(api){
+
+        API_URL = api;
+
+        localStorage.setItem(
+            "server_api",
+            api
+        );
+
+    }
+
+
+    addLog(
+        "Settings saved.",
+        "success"
+    );
+
+    updateStatus();
+
+}
+
+
+/* ---------------- LOAD SETTINGS ---------------- */
+
+function loadSettings(){
+
+    const name =
+        localStorage.getItem(
+            "server_name"
+        );
+
+    const api =
+        localStorage.getItem(
+            "server_api"
+        );
+
+
+    if(name){
+
+        document.getElementById(
+            "serverName"
+        ).textContent =
+            name;
+
+        document.getElementById(
+            "nameInput"
+        ).value =
+            name;
+
+    }
+
+
+    if(api){
+
+        API_URL = api;
+
+        document.getElementById(
+            "apiInput"
+        ).value =
+            api;
+
+    }
+
+}
+
+
+/* ---------------- START ---------------- */
+
+loadSettings();
+
+updateStatus();
+
+updateLogs();
+
+
+setInterval(
+    updateStatus,
+    5000
+);
+
+setInterval(
+    updateLogs,
+    2000
+);
+
+addLog(
+    "Control panel loaded.",
+    "s
+```
