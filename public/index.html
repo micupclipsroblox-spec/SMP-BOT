@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Minecraft Bot Control</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #08090d;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    width: min(1100px, 94%);
+    margin: 40px auto;
+}
+
+h1 {
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: #858b98;
+    margin-bottom: 25px;
+}
+
+.status {
+    background: #0e1016;
+    border: 1px solid #20232c;
+    padding: 18px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.status-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #ef4354;
+}
+
+.dot.online {
+    background: #36d889;
+    box-shadow: 0 0 12px #36d889;
+}
+
+#statusText {
+    font-weight: bold;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.panel {
+    background: #0e1016;
+    border: 1px solid #20232c;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    color: #969ba7;
+    font-size: 13px;
+    margin-bottom: 7px;
+}
+
+input {
+    width: 100%;
+    background: #080a0e;
+    border: 1px solid #292e39;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    outline: none;
+    margin-bottom: 14px;
+}
+
+input:focus {
+    border-color: #6474e9;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+button {
+    border: 1px solid #292e39;
+    background: #171a21;
+    color: white;
+    padding: 11px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    filter: brightness(1.2);
+}
+
+.start {
+    background: #168b58;
+    border-color: #168b58;
+}
+
+.stop {
+    background: #a82f40;
+    border-color: #a82f40;
+}
+
+.restart {
+    background: #515fd4;
+    border-color: #515fd4;
+}
+
+.console {
+    height: 400px;
+    overflow-y: auto;
+    background: #07090d;
+    border-radius: 8px;
+    padding: 15px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.log {
+    color: #aeb4c0;
+}
+
+.success {
+    color: #3ddb96;
+}
+
+.error {
+    color: #ff6877;
+}
+
+.command {
+    color: #8292ff;
+}
+
+.command-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.command-row input {
+    margin: 0;
+    flex: 1;
+}
+
+@media(max-width:700px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>◆ Minecraft Bot Control</h1>
+
+    <div class="subtitle">
+        Mineflayer Control Panel
+    </div>
+
+
+    <div class="status">
+
+        <div class="status-left">
+
+            <div
+                class="dot"
+                id="dot"
+            ></div>
+
+            <span id="statusText">
+                Offline
+            </span>
+
+        </div>
+
+        <span id="botName">
+            WebBot
+        </span>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h3>Connection</h3>
+
+        <div class="grid">
+
+            <div>
+
+                <label>
+                    Minecraft Server IP
+                </label>
+
+                <input
+                    id="host"
+                    placeholder="play.example.com"
+                >
+
+            </div>
+
+            <div>
+
+                <label>
+                    Port
+                </label>
+
+                <input
+                    id="port"
+                    value="25565"
+                    type="number"
+                >
+
+            </div>
+
+        </div>
+
+
+        <label>
+            Bot Username
+        </label>
+
+        <input
+            id="username"
+            value="WebBot"
+        >
+
+
+        <label>
+            Minecraft Version
+        </label>
+
+        <input
+            id="version"
+            placeholder="Leave empty for automatic"
+        >
+
+
+        <button onclick="saveConfig()">
+            Save Configuration
+        </button>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h3>Bot Controls</h3>
+
+        <div class="buttons">
+
+            <button
+                class="start"
+                onclick="startBot()"
+            >
+                ▶ Start Bot
+            </button>
+
+            <button
+                class="stop"
+                onclick="stopBot()"
+            >
+                ■ Stop Bot
+            </button>
+
+            <button
+                class="restart"
+                onclick="restartBot()"
+            >
+                ↻ Restart Bot
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h3>Console</h3>
+
+        <div
+            class="console"
+            id="console"
+        ></div>
+
+
+        <div class="command-row">
+
+            <input
+                id="command"
+                placeholder="Minecraft chat command..."
+                onkeydown="
+                    if(event.key === 'Enter')
+                        sendCommand()
+                "
+            >
+
+            <button onclick="sendCommand()">
+                Send
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+
+const socket = io();
+
+
+const consoleElement =
+    document.getElementById("console");
+
+
+function addLog(data) {
+
+    const line =
+        document.createElement("div");
+
+    line.className =
+        "log " + (data.type || "");
+
+    line.textContent =
+        `[${data.time}] ${data.message}`;
+
+    consoleElement.appendChild(line);
+
+    consoleElement.scrollTop =
+        consoleElement.scrollHeight;
+}
+
+
+socket.on("log", addLog);
+
+
+socket.on("status", data => {
+
+    const dot =
+        document.getElementById("dot");
+
+    const status =
+        document.getElementById("statusText");
+
+    const name =
+        document.getElementById("botName");
+
+
+    if(data.online) {
+
+        dot.classList.add("online");
+
+        status.textContent =
+            "Online";
+
+    } else {
+
+        dot.classList.remove("online");
+
+        status.textContent =
+            "Offline";
+    }
+
+
+    name.textContent =
+        data.username || "WebBot";
+});
+
+
+socket.on("config", config => {
+
+    document.getElementById("host")
+        .value = config.host;
+
+    document.getElementById("port")
+        .value = config.port;
+
+    document.getElementById("username")
+        .value = config.username;
+
+    document.getElementById("version")
+        .value = config.version || "";
+});
+
+
+function saveConfig() {
+
+    socket.emit("updateConfig", {
+
+        host:
+            document.getElementById("host")
+                .value,
+
+        port:
+            document.getElementById("port")
+                .value,
+
+        username:
+            document.getElementById("username")
+                .value,
+
+        version:
+            document.getElementById("version")
+                .value
+
+    });
+}
+
+
+function startBot() {
+
+    saveConfig();
+
+    socket.emit("start");
+}
+
+
+function stopBot() {
+
+    socket.emit("stop");
+}
+
+
+function restartBot() {
+
+    saveConfig();
+
+    socket.emit("restart");
+}
+
+
+function sendCommand() {
+
+    const input =
+        document.getElementById("command");
+
+    const command =
+        input.value.trim();
+
+    if(!command)
+        return;
+
+    socket.emit(
+        "command",
+        command
+    );
+
+    input.value = "";
+}
+
+</script>
+
+</body>
+</html>
