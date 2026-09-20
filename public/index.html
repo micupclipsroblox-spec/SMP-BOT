@@ -1,10 +1,11 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Minecraft Bot Control</title>
+<title>KoneSMP Bot Control</title>
 
 <style>
 * {
@@ -13,93 +14,178 @@
 
 body {
     margin: 0;
-    background: #08090d;
-    color: #fff;
-    font-family: Arial, sans-serif;
+    background: #07080c;
+    color: #f5f5f5;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-.container {
-    width: min(1100px, 94%);
-    margin: 40px auto;
+button,
+input {
+    font: inherit;
 }
 
-h1 {
-    margin-bottom: 5px;
+button {
+    cursor: pointer;
 }
 
-.subtitle {
-    color: #858b98;
-    margin-bottom: 25px;
+.app {
+    min-height: 100vh;
+    display: flex;
 }
 
-.status {
-    background: #0e1016;
-    border: 1px solid #20232c;
-    padding: 18px;
-    border-radius: 12px;
+/* SIDEBAR */
+
+.sidebar {
+    width: 235px;
+    min-height: 100vh;
+    background: #0d0f14;
+    border-right: 1px solid #20242d;
+    padding: 20px 14px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.logo {
+    font-size: 21px;
+    font-weight: 800;
+    padding: 10px 12px 28px;
+}
+
+.logo span {
+    color: #6575ff;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.nav button {
+    width: 100%;
+    border: 0;
+    border-radius: 8px;
+    padding: 13px;
+    background: transparent;
+    color: #8e949f;
+    text-align: left;
+}
+
+.nav button:hover,
+.nav button.active {
+    background: #191c24;
+    color: white;
+}
+
+/* MAIN */
+
+.main {
+    margin-left: 235px;
+    width: calc(100% - 235px);
+    padding: 30px;
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 25px;
 }
 
-.status-left {
+.title {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.subtitle {
+    color: #858b97;
+    margin-top: 5px;
+}
+
+/* STATUS */
+
+.status-box {
     display: flex;
     align-items: center;
     gap: 10px;
+    color: #969ba7;
 }
 
-.dot {
+.status-dot {
     width: 11px;
     height: 11px;
     border-radius: 50%;
-    background: #ef4354;
+    background: #ef4658;
 }
 
-.dot.online {
-    background: #36d889;
-    box-shadow: 0 0 12px #36d889;
+.status-dot.online {
+    background: #35d98a;
+    box-shadow: 0 0 13px #35d98a;
 }
 
-#statusText {
-    font-weight: bold;
+.status-dot.connecting {
+    background: #e8b84c;
+    box-shadow: 0 0 13px #e8b84c;
 }
 
-.grid {
+/* CARDS */
+
+.cards {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
     gap: 15px;
+    margin-bottom: 20px;
 }
+
+.card {
+    background: #0e1016;
+    border: 1px solid #20242d;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.card-label {
+    color: #858b97;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.card-value {
+    font-size: 24px;
+    font-weight: 800;
+}
+
+/* PANELS */
 
 .panel {
     background: #0e1016;
-    border: 1px solid #20232c;
+    border: 1px solid #20242d;
     border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.panel-title {
+    padding: 16px 20px;
+    border-bottom: 1px solid #20242d;
+    font-weight: 700;
+}
+
+.panel-content {
     padding: 20px;
-    margin-bottom: 15px;
 }
 
-label {
-    display: block;
-    color: #969ba7;
-    font-size: 13px;
-    margin-bottom: 7px;
-}
-
-input {
-    width: 100%;
-    background: #080a0e;
-    border: 1px solid #292e39;
-    color: white;
-    padding: 12px;
-    border-radius: 8px;
-    outline: none;
-    margin-bottom: 14px;
-}
-
-input:focus {
-    border-color: #6474e9;
-}
+/* BUTTONS */
 
 .buttons {
     display: flex;
@@ -107,17 +193,24 @@ input:focus {
     flex-wrap: wrap;
 }
 
-button {
-    border: 1px solid #292e39;
+.btn {
+    border: 1px solid #2a2e38;
     background: #171a21;
     color: white;
-    padding: 11px 18px;
+    padding: 12px 20px;
     border-radius: 8px;
-    cursor: pointer;
+    transition: .15s;
 }
 
-button:hover {
-    filter: brightness(1.2);
+.btn:hover {
+    filter: brightness(1.18);
+    transform: translateY(-1px);
+}
+
+.btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .start {
@@ -126,56 +219,175 @@ button:hover {
 }
 
 .stop {
-    background: #a82f40;
-    border-color: #a82f40;
+    background: #a92f40;
+    border-color: #a92f40;
 }
 
 .restart {
-    background: #515fd4;
-    border-color: #515fd4;
+    background: #515fd5;
+    border-color: #515fd5;
 }
 
+/* CONSOLE */
+
 .console {
-    height: 400px;
+    height: 430px;
     overflow-y: auto;
-    background: #07090d;
-    border-radius: 8px;
-    padding: 15px;
+    padding: 16px;
+    background: #06080b;
     font-family: Consolas, monospace;
     font-size: 13px;
     line-height: 1.7;
+    white-space: pre-wrap;
 }
 
 .log {
     color: #aeb4c0;
 }
 
-.success {
-    color: #3ddb96;
+.log.success {
+    color: #40db95;
 }
 
-.error {
-    color: #ff6877;
+.log.error {
+    color: #ff6978;
 }
 
-.command {
+.log.command {
     color: #8292ff;
 }
+
+.log.warn {
+    color: #e9bb51;
+}
+
+/* COMMAND */
 
 .command-row {
     display: flex;
     gap: 10px;
-    margin-top: 10px;
+    padding: 12px 0 0;
 }
 
-.command-row input {
-    margin: 0;
+.command-input {
     flex: 1;
+    background: #080a0e;
+    border: 1px solid #292e38;
+    color: white;
+    border-radius: 8px;
+    padding: 12px;
+    outline: none;
 }
 
-@media(max-width:700px) {
-    .grid {
+.command-input:focus {
+    border-color: #6676ec;
+}
+
+/* FORMS */
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 180px;
+    gap: 12px;
+}
+
+.field {
+    margin-bottom: 18px;
+}
+
+.field label {
+    display: block;
+    color: #9298a4;
+    font-size: 13px;
+    margin-bottom: 7px;
+}
+
+.field input {
+    width: 100%;
+    background: #080a0e;
+    border: 1px solid #292e38;
+    color: white;
+    border-radius: 8px;
+    padding: 12px;
+    outline: none;
+}
+
+.field input:focus {
+    border-color: #6676ec;
+}
+
+/* CONNECTION */
+
+.connection {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #969ba7;
+}
+
+.connection-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #ef4658;
+}
+
+.connection-dot.connected {
+    background: #35d98a;
+}
+
+/* MOBILE */
+
+@media(max-width: 900px) {
+
+    .sidebar {
+        width: 65px;
+        padding: 15px 7px;
+    }
+
+    .logo {
+        font-size: 0;
+        text-align: center;
+    }
+
+    .logo span {
+        font-size: 21px;
+    }
+
+    .nav button {
+        font-size: 0;
+        text-align: center;
+    }
+
+    .nav button::first-letter {
+        font-size: 20px;
+    }
+
+    .main {
+        margin-left: 65px;
+        width: calc(100% - 65px);
+        padding: 18px;
+    }
+
+    .cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media(max-width: 550px) {
+
+    .cards {
         grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        align-items: flex-start;
+        gap: 15px;
+        flex-direction: column;
     }
 }
 </style>
@@ -183,22 +395,76 @@ button:hover {
 
 <body>
 
-<div class="container">
+<div class="app">
 
-    <h1>◆ Minecraft Bot Control</h1>
+<!-- SIDEBAR -->
 
-    <div class="subtitle">
-        Mineflayer Control Panel
+<aside class="sidebar">
+
+    <div class="logo">
+        <span>◆</span> KoneSMP
     </div>
 
+    <div class="nav">
 
-    <div class="status">
+        <button
+            class="active"
+            onclick="openPage('dashboard', this)"
+        >
+            🏠 Dashboard
+        </button>
 
-        <div class="status-left">
+        <button
+            onclick="openPage('console', this)"
+        >
+            🖥 Console
+        </button>
+
+        <button
+            onclick="openPage('settings', this)"
+        >
+            ⚙ Settings
+        </button>
+
+    </div>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="main">
+
+<!-- DASHBOARD -->
+
+<section
+    id="dashboard"
+    class="page active"
+>
+
+    <div class="header">
+
+        <div>
 
             <div
-                class="dot"
-                id="dot"
+                class="title"
+                id="serverTitle"
+            >
+                KoneSMP Bot
+            </div>
+
+            <div class="subtitle">
+                Minecraft Bot Control Panel
+            </div>
+
+        </div>
+
+
+        <div class="status-box">
+
+            <div
+                id="statusDot"
+                class="status-dot"
             ></div>
 
             <span id="statusText">
@@ -207,287 +473,35 @@ button:hover {
 
         </div>
 
-        <span id="botName">
-            WebBot
-        </span>
-
     </div>
 
 
-    <div class="panel">
+    <!-- CARDS -->
 
-        <h3>Connection</h3>
+    <div class="cards">
 
-        <div class="grid">
+        <div class="card">
 
-            <div>
-
-                <label>
-                    Minecraft Server IP
-                </label>
-
-                <input
-                    id="host"
-                    placeholder="play.example.com"
-                >
-
+            <div class="card-label">
+                Bot Status
             </div>
 
-            <div>
-
-                <label>
-                    Port
-                </label>
-
-                <input
-                    id="port"
-                    value="25565"
-                    type="number"
-                >
-
+            <div
+                class="card-value"
+                id="statusValue"
+            >
+                Offline
             </div>
 
         </div>
 
 
-        <label>
-            Bot Username
-        </label>
-
-        <input
-            id="username"
-            value="WebBot"
-        >
-
-
-        <label>
-            Minecraft Version
-        </label>
-
-        <input
-            id="version"
-            placeholder="Leave empty for automatic"
-        >
-
-
-        <button onclick="saveConfig()">
-            Save Configuration
-        </button>
-
-    </div>
-
-
-    <div class="panel">
-
-        <h3>Bot Controls</h3>
-
-        <div class="buttons">
-
-            <button
-                class="start"
-                onclick="startBot()"
-            >
-                ▶ Start Bot
-            </button>
-
-            <button
-                class="stop"
-                onclick="stopBot()"
-            >
-                ■ Stop Bot
-            </button>
-
-            <button
-                class="restart"
-                onclick="restartBot()"
-            >
-                ↻ Restart Bot
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <div class="panel">
-
-        <h3>Console</h3>
-
-        <div
-            class="console"
-            id="console"
-        ></div>
-
-
-        <div class="command-row">
-
-            <input
-                id="command"
-                placeholder="Minecraft chat command..."
-                onkeydown="
-                    if(event.key === 'Enter')
-                        sendCommand()
-                "
-            >
-
-            <button onclick="sendCommand()">
-                Send
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<script src="/socket.io/socket.io.js"></script>
-
-<script>
-
-const socket = io();
-
-
-const consoleElement =
-    document.getElementById("console");
-
-
-function addLog(data) {
-
-    const line =
-        document.createElement("div");
-
-    line.className =
-        "log " + (data.type || "");
-
-    line.textContent =
-        `[${data.time}] ${data.message}`;
-
-    consoleElement.appendChild(line);
-
-    consoleElement.scrollTop =
-        consoleElement.scrollHeight;
-}
-
-
-socket.on("log", addLog);
-
-
-socket.on("status", data => {
-
-    const dot =
-        document.getElementById("dot");
-
-    const status =
-        document.getElementById("statusText");
-
-    const name =
-        document.getElementById("botName");
-
-
-    if(data.online) {
-
-        dot.classList.add("online");
-
-        status.textContent =
-            "Online";
-
-    } else {
-
-        dot.classList.remove("online");
-
-        status.textContent =
-            "Offline";
-    }
-
-
-    name.textContent =
-        data.username || "WebBot";
-});
-
-
-socket.on("config", config => {
-
-    document.getElementById("host")
-        .value = config.host;
-
-    document.getElementById("port")
-        .value = config.port;
-
-    document.getElementById("username")
-        .value = config.username;
-
-    document.getElementById("version")
-        .value = config.version || "";
-});
-
-
-function saveConfig() {
-
-    socket.emit("updateConfig", {
-
-        host:
-            document.getElementById("host")
-                .value,
-
-        port:
-            document.getElementById("port")
-                .value,
-
-        username:
-            document.getElementById("username")
-                .value,
-
-        version:
-            document.getElementById("version")
-                .value
-
-    });
-}
-
-
-function startBot() {
-
-    saveConfig();
-
-    socket.emit("start");
-}
-
-
-function stopBot() {
-
-    socket.emit("stop");
-}
-
-
-function restartBot() {
-
-    saveConfig();
-
-    socket.emit("restart");
-}
-
-
-function sendCommand() {
-
-    const input =
-        document.getElementById("command");
-
-    const command =
-        input.value.trim();
-
-    if(!command)
-        return;
-
-    socket.emit(
-        "command",
-        command
-    );
-
-    input.value = "";
-}
-
-</script>
-
-</body>
-</html>
+        <div class="card">
+
+            <div class="card-label">
+                Bot Username
+            </div>
+
+            <div
+                class="card-valu
+```
